@@ -1,3 +1,51 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
-  background-color: rgb(214, 203, 171);
+  background-color: rgb(212, 212, 212);
+  
+}
+
+#btn_mainMenu {
+  width: 60px;
+  height: 60px;
+}
+
+
+.toggle-container {
+    position: relative;
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.toggle {
+    position: relative;
+    width: 40px;
+    height: 20px;
+    background-color: white;
+    padding: 2px;
+}
+
+.toggle:before {
+    /* this :before is the handle that moves back and forth */
+    position: absolute;
+    box-sizing: border-box; /* not inherited for some reason*/
+    content: "";
+    height: 16px;
+    width: 18px;
+    bottom: 2px;
+    background-color: black;
+    transition: transform 200ms cubic-bezier(0.2, 0.32, 0.62, 1.68);
+}
+
+.toggle-container.toggled .toggle {
+    background-color: rgb(134, 213, 240);
+}
+
+.toggle-container.toggled .toggle:before {
+    transform: translateX(100%);
 }

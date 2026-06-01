@@ -28,8 +28,6 @@ const btn_switchInterface = {
   },
 
   func() {
-    removeUiElement(ui_titleText);
-    // removeUiElement(btn_startButton)
-    // addUiElement(btn_)
+    switchToUiGroup(uiGroup_loggerGroup)
   },
 };
