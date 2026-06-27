@@ -29,5 +29,6 @@ const btn_switchInterface = {
 
   func() {
     switchToUiGroup(uiGroup_loggerGroup)
+    // should sync btn_toggle here
   },
 };

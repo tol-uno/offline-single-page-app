@@ -10,11 +10,9 @@ const btn_toggle = {
     `;
   },
 
-  func(domElement) {
-    domElement.classList.toggle("toggled");
-    const toggleState = getToggleState(domElement); // this was a UserInterface.getToggleS....
-    document.body.style.backgroundColor = toggleState
-      ? "darkgray"
-      : "lightgray";
+  func() {
+    this.domReference.classList.toggle("toggled");
+    const toggleState = getToggleState(this.domReference); // this was a UserInterface.getToggleS....
+    document.body.style.backgroundColor = toggleState ? "darkgray" : "lightgray";
   },
 };

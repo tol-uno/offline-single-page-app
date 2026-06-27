@@ -12,6 +12,15 @@ body {
   height: 60px;
 }
 
+#ui_buttonContainer {
+  border: 2px solid rgb(98, 98, 98);
+  background-color: rgb(173, 173, 173);
+  display: flex;
+  padding: 10px;
+  border-radius: 5px;
+  flex-direction: column;
+}
+
 
 .toggle-container {
     position: relative;
