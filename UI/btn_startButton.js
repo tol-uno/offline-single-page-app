@@ -1,7 +1,7 @@
 const btn_startButton = {
   name: "btn_startButton",
 
-  template(props) {
+  template() {
     return /* HTML */ `
       <button id="${this.name}">
         <div>Add Title Text</div>

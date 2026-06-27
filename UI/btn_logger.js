@@ -16,7 +16,7 @@ const btn_logger = {
    * @param {Object} props - Component properties
    * @returns {string} HTML string
    */
-  template(props) {
+  template() {
     return /* HTML */ `
       <button id="${this.name}">
         <div>Log Something</div>

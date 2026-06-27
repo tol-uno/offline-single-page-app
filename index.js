@@ -1,4 +1,4 @@
-const activeUIGroup = new Set();
+const activeUiGroup = new Set();
 const DomParser = new DOMParser();
 
 const uiGroup_startButtonGroup = new Set([btn_startButton, btn_switchInterface, ui_buttonContainer]);
@@ -6,7 +6,7 @@ const uiGroup_loggerGroup = new Set([btn_logger, btn_mainMenu, btn_toggle]);
 
 function addUiElement(element) {
   // also adds any sub elements
-  if (activeUIGroup.has(element)) {
+  if (activeUiGroup.has(element)) {
     return;
   }
 
@@ -20,13 +20,16 @@ function addUiElement(element) {
     throw new Error(`Failed to parse template for: ${element.name}`);
   }
   document.body.appendChild(domElement);
+  
+  // COULD MAKE ALL DOM REFERENCE MANAGEMENT HANDLED BY A FUNCTION
+  // IN THE COMPONENT. THIS WOULD ALSO APPLY TO SLIDERS IN THE REAL APP
   element.domReference = domElement;
 
-  activeUIGroup.add(element);
+  activeUiGroup.add(element);
 
   // register any sub components to activeUiGroup and add their domReferences
   for (const child of subElements) {
-    activeUIGroup.add(child);
+    activeUiGroup.add(child);
     child.domReference = domElement.querySelector(`#${child.name}`);
   }
 }
@@ -58,20 +61,24 @@ function parseChildren(strings, ...values) {
   return { fullHTMLString, subElements };
 }
 
-function parseDomElement(elementString) {
-  const parsedDocument = DomParser.parseFromString(elementString, "text/html");
-  return parsedDocument.body.firstChild;
+function parseDomElement (templateString) {
+  try {
+    const parsedDocument = DomParser.parseFromString(templateString, "text/html");
+    return parsedDocument.body.firstElementChild;
+  } catch (error) {
+    throw new Error(`Failed to parse DOM element: ${error.message}`);
+  }
 }
 
 function removeUiElement(element) {
-  const wasRemoved = activeUIGroup.delete(element);
+  const wasRemoved = activeUiGroup.delete(element);
 
   if (wasRemoved && element.domReference) {
     element.domReference.remove();
     element.domReference = null;
 
     // also removes sub components
-    subElements = element.template().subElements ?? [];
+    const subElements = element.template().subElements ?? [];
     for (const element of subElements) {
       element.domReference = null;
     }
@@ -81,16 +88,16 @@ function removeUiElement(element) {
 function switchToUiGroup(newUiGroup) {
   const newUiGroupWithSubElements = new Set(newUiGroup);
 
-  // Add subElements to newUiGroupWithSubElements
+  // Populate newUiGroupWithSubElements with all missing subElements before switching to it
   for (const element of newUiGroup) {
-    const subElements = element.template().subElements ?? [];
-    for (const sub of subElements) {
-      newUiGroupWithSubElements.add(sub);
+    const allSubElements = element.template().subElements ?? [];
+    for (const subElement of allSubElements) {
+      newUiGroupWithSubElements.add(subElement);
     }
   }
 
   // Remove current active elements that're not in newUiGroupWithSubElements
-  for (const element of activeUIGroup) {
+  for (const element of activeUiGroup) {
     if (!newUiGroupWithSubElements.has(element)) {
       removeUiElement(element);
     }
@@ -112,7 +119,7 @@ function handleClick(event) {
 
   // Find element that matches the clicked DOM element
   let clickedElement = null;
-  for (const element of activeUIGroup) {
+  for (const element of activeUiGroup) {
     if (element.domReference === domElementClicked) {
       clickedElement = element;
       break;

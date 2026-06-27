@@ -16,7 +16,7 @@ const btn_switchInterface = {
    * @param {Object} props - Component properties
    * @returns {string} HTML string
    */
-  template(props) {
+  template() {
     return /* HTML */ `
       <button id="${this.name}">
         <div>Switch UI</div>

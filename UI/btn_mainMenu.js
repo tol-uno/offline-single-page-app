@@ -1,7 +1,7 @@
 const btn_mainMenu = {
   name: "btn_mainMenu",
 
-  template(props) {
+  template() {
     return /* HTML */ `
       <button id="${this.name}">
         <div>

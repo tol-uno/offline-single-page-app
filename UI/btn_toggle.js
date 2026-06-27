@@ -1,7 +1,7 @@
 const btn_toggle = {
   name: "btn_toggle",
 
-  template(props) {
+  template() {
     return /* HTML */ `
       <div id="${this.name}" class="toggle-container">
         <span class="label">Change BG</span>
