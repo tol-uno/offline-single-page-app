@@ -1,67 +1,10 @@
-const activeUiGroup = new Set();
 const DomParser = new DOMParser();
 
 const uiGroup_startButtonGroup = new Set([btn_startButton, btn_switchInterface, ui_buttonContainer]);
 const uiGroup_loggerGroup = new Set([btn_logger, btn_mainMenu, btn_toggle]);
+const uiGroup_classBased = new Set([ui_containerSub3]);
 
-function addUiElement(element) {
-  // also adds any sub elements
-  if (activeUiGroup.has(element)) {
-    return;
-  }
-
-  const template = element.template();
-  const string = template.fullHTMLString ?? template;
-  const subElements = template.subElements ?? [];
-
-  const domElement = parseDomElement(string);
-
-  if (!domElement) {
-    throw new Error(`Failed to parse template for: ${element.name}`);
-  }
-  document.body.appendChild(domElement);
-  
-  // COULD MAKE ALL DOM REFERENCE MANAGEMENT HANDLED BY A FUNCTION
-  // IN THE COMPONENT. THIS WOULD ALSO APPLY TO SLIDERS IN THE REAL APP
-  element.domReference = domElement;
-
-  activeUiGroup.add(element);
-
-  // register any sub components to activeUiGroup and add their domReferences
-  for (const child of subElements) {
-    activeUiGroup.add(child);
-    child.domReference = domElement.querySelector(`#${child.name}`);
-  }
-}
-
-// Used as a tagged template literal that is required for components with nested components
-function parseChildren(strings, ...values) {
-  let subElements = [];
-  // each value being mapped is a ${} in the string
-  const processChildren = values.map((value) => {
-    if (value.template) {
-      // if the value in the ${} is a component (has a template)
-      subElements.push(value);
-      return value.template();
-    } else {
-      // this is usually the name of the component
-      return value;
-    }
-  });
-
-  // Combine all string fragments and ${} values together
-  let fullHTMLString = "";
-  for (let i = 0; i < strings.length; i++) {
-    fullHTMLString += strings[i];
-    if (i < processChildren.length) {
-      fullHTMLString += processChildren[i];
-    }
-  }
-
-  return { fullHTMLString, subElements };
-}
-
-function parseDomElement (templateString) {
+function parseStringToDomElement(templateString) {
   try {
     const parsedDocument = DomParser.parseFromString(templateString, "text/html");
     return parsedDocument.body.firstElementChild;
@@ -70,44 +13,102 @@ function parseDomElement (templateString) {
   }
 }
 
-function removeUiElement(element) {
-  const wasRemoved = activeUiGroup.delete(element);
+function parseComponentIntoDomElement(strings, ...values) {
+  // each value is a ${} in the string template literal
+  // recursivly expand all nested components to Dom elements
+  const allSubElementsFound = [];
+  const domChildrenArray = values.map((subElement) => {
+    const result = subElement.template(); // uses this parseComponentIntoDomElement to parse template
 
-  if (wasRemoved && element.domReference) {
-    element.domReference.remove();
-    element.domReference = null;
+    subElement.registerDomReferences(result.domElement); // register sub elements domReference
 
-    // also removes sub components
-    const subElements = element.template().subElements ?? [];
-    for (const element of subElements) {
+    // collect this child's own discovered sub-elements into the shared top-level array
+    allSubElementsFound.push(...result.allSubElementsFound);
+
+    // also track this child itself, since it's a sub-element of the current template
+    allSubElementsFound.push(subElement);
+    // allSubElementsFound.push(result.domElement); // old way where this array was populated with dom elements. Now that each class instance has its domReference set we can just use the class instance here. ^^ see above
+
+    return result.domElement;
+  });
+
+  // add placeholder divs with the id of child that can be replaced with the actual child dom element
+  // mash all string fragments together but turn ${subElements} into placeholder divs with an id
+  let stringWithSubElementPlaceholders = "";
+  for (let i = 0; i < strings.length; i++) {
+    stringWithSubElementPlaceholders += strings[i];
+    if (i < domChildrenArray.length) {
+      stringWithSubElementPlaceholders += `<div id="${domChildrenArray[i].id}"></div>`;
+    }
+  }
+  // parse and create the actual DOM element
+  const domElement = parseStringToDomElement(stringWithSubElementPlaceholders);
+
+  // slot in actual sub-element dom-elements into the placeholder divs
+  for (const domChild of domChildrenArray) {
+    // get placeholder div in domElement that aligns with this domChild
+    const placeholderDiv = domElement.querySelector(`#${domChild.id}`);
+
+    placeholderDiv.replaceWith(domChild);
+  }
+
+  return { domElement, allSubElementsFound };
+}
+
+const UserInterface = {
+  activeUiGroup: new Set(),
+
+  addUiElement: function (element) {
+    if (UserInterface.activeUiGroup.has(element)) {
+      return;
+    }
+
+    element.addDomElement(document.body);
+
+    UserInterface.activeUiGroup.add(element);
+    for (const subElement of element.subElements) {
+      UserInterface.activeUiGroup.add(subElement);
+    }
+  },
+
+  removeUiElement: function (element) {
+    const wasRemoved = UserInterface.activeUiGroup.delete(element);
+
+    if (wasRemoved && element.domReference) {
+      element.domReference.remove();
       element.domReference = null;
+
+      // Remove subElements from activeUiGroup and set domReferences to null
+      for (const subElement of element.subElements) {
+        UserInterface.activeUiGroup.delete(subElement);
+        subElement.domReference = null;
+      }
     }
-  }
-}
+  },
 
-function switchToUiGroup(newUiGroup) {
-  const newUiGroupWithSubElements = new Set(newUiGroup);
+  switchToUiGroup: function (newUiGroup) {
+    const newUiGroupIncludingSubElements = new Set(newUiGroup);
 
-  // Populate newUiGroupWithSubElements with all missing subElements before switching to it
-  for (const element of newUiGroup) {
-    const allSubElements = element.template().subElements ?? [];
-    for (const subElement of allSubElements) {
-      newUiGroupWithSubElements.add(subElement);
+    // Populate newUiGroupIncludingSubElements with all missing subElements before switching to it
+    for (const element of newUiGroup) {
+      for (const subElement of element.subElements) {
+        newUiGroupIncludingSubElements.add(subElement);
+      }
     }
-  }
 
-  // Remove current active elements that're not in newUiGroupWithSubElements
-  for (const element of activeUiGroup) {
-    if (!newUiGroupWithSubElements.has(element)) {
-      removeUiElement(element);
+    // Remove current active elements that're not in newUiGroupIncludingSubElements
+    for (const element of UserInterface.activeUiGroup) {
+      if (!newUiGroupIncludingSubElements.has(element)) {
+        this.removeUiElement(element);
+      }
     }
-  }
 
-  // Only add parents. subElements are added by their parents
-  for (const element of newUiGroup) {
-    addUiElement(element);
-  }
-}
+    // Only add parent elements -- subElements are added by their parents
+    for (const element of newUiGroup) {
+      this.addUiElement(element);
+    }
+  },
+};
 
 function getToggleState(toggleButton) {
   return toggleButton.classList.contains("toggled");
@@ -119,7 +120,7 @@ function handleClick(event) {
 
   // Find element that matches the clicked DOM element
   let clickedElement = null;
-  for (const element of activeUiGroup) {
+  for (const element of UserInterface.activeUiGroup) {
     if (element.domReference === domElementClicked) {
       clickedElement = element;
       break;
@@ -134,4 +135,4 @@ function handleClick(event) {
 
 document.addEventListener("click", handleClick);
 
-switchToUiGroup(uiGroup_startButtonGroup);
+UserInterface.switchToUiGroup(uiGroup_startButtonGroup);

@@ -1,15 +1,13 @@
-const btn_startButton = {
-  name: "btn_startButton",
-
-  template() {
-    return /* HTML */ `
-      <button id="${this.name}">
+const btn_startButton = new uiElement(
+  "button",
+  () => {
+    return /* HTML */ parseComponentIntoDomElement`
+      <button id="btn_startButton">
         <div>Add Title Text</div>
       </button>
     `;
   },
-
-  func() {
-    addUiElement(ui_titleText);
+  () => {
+    UserInterface.addUiElement(ui_titleText);
   },
-};
+);

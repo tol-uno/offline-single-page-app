@@ -1,18 +1,17 @@
-const btn_toggle = {
-  name: "btn_toggle",
-
-  template() {
-    return /* HTML */ `
-      <div id="${this.name}" class="toggle-container">
+const btn_toggle = new uiElement(
+  "toggle",
+  () => {
+    return /* HTML */ parseComponentIntoDomElement`
+      <div id="btn_toggle" class="toggle-container">
         <span class="label">Change BG</span>
         <div class="toggle"></div>
       </div>
     `;
   },
-
-  func() {
-    this.domReference.classList.toggle("toggled");
-    const toggleState = getToggleState(this.domReference); // this was a UserInterface.getToggleS....
+  () => {
+    btn_toggle.domReference.classList.toggle("toggled");
+    const toggleState = getToggleState(btn_toggle.domReference); // this was a UserInterface.getToggleS....
+    btn_toggle.label.textContent = toggleState ? 'BG Dark': 'BG Light'
     document.body.style.backgroundColor = toggleState ? "darkgray" : "lightgray";
   },
-};
+);

@@ -1,16 +1,13 @@
-
-const btn_sub2 = {
-  name: "btn_sub2",
-
-  template() {
-    return /* HTML */ `
-      <button id="${this.name}">
-        <div>Sub2 Button</div>
-      </button>
-    `;
+const btn_sub2 = new uiElement(
+  "button",
+  () => {
+    return /* HTML */ parseComponentIntoDomElement`
+            <button id="btn_sub2">
+                <div>Sub2 Button</div>
+            </button>
+        `;
   },
-
-  func() {
+  () => {
     console.log("sub2 Clicked!");
   },
-};
+);
