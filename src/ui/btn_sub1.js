@@ -1,4 +1,7 @@
-const btn_sub1 = new uiElement(
+import uiElement from "../uiElement";
+import { parseComponentIntoDomElement } from "..";
+
+export const btn_sub1 = new uiElement(
   "button",
   () => {
     return /* HTML */ parseComponentIntoDomElement`

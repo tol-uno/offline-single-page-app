@@ -1,4 +1,8 @@
-const btn_startButton = new uiElement(
+import uiElement from "../uiElement";
+import { parseComponentIntoDomElement, UserInterface } from "..";
+import { ui_titleText } from "./ui_titleText";
+
+export const btn_startButton = new uiElement(
   "button",
   () => {
     return /* HTML */ parseComponentIntoDomElement`

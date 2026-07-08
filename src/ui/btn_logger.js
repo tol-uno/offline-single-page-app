@@ -1,4 +1,7 @@
-const btn_logger = new uiElement(
+import uiElement from "../uiElement";
+import { parseComponentIntoDomElement } from "..";
+
+export const btn_logger = new uiElement(
   "button",
   () => {
     return /* HTML */ parseComponentIntoDomElement`

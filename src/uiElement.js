@@ -1,4 +1,4 @@
-class uiElement {
+export default class uiElement {
   /**
    * @param id {string}
    * @param type {"button" | "slider" | "toggle" | "display"}
@@ -25,12 +25,12 @@ class uiElement {
   }
 
   /**
-  * Add slider for testing
-  * Test labels and handles 
-  *  
-  * COULD DO:
+   * Add slider for testing
+   * Test labels and handles
+   *
+   * COULD DO:
    * When subElements are being added they should all check to make sure they dont already exist
-   * - If they do, remove the old one before adding the new one  
+   * - If they do, remove the old one before adding the new one
    */
 
   addDomElement(container) {

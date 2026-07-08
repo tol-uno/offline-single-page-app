@@ -1,4 +1,7 @@
-const btn_mainMenu = new uiElement(
+import uiElement from "../uiElement";
+import { parseComponentIntoDomElement, UserInterface, uiGroup_startButtonGroup } from "..";
+
+export const btn_mainMenu = new uiElement(
   "button",
   () => {
     return /* HTML */ parseComponentIntoDomElement`

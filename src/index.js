@@ -1,19 +1,22 @@
 const DomParser = new DOMParser();
 
-const uiGroup_startButtonGroup = new Set([btn_startButton, btn_switchInterface, ui_buttonContainer]);
-const uiGroup_loggerGroup = new Set([btn_logger, btn_mainMenu, btn_toggle]);
-const uiGroup_classBased = new Set([ui_containerSub3]);
+import { btn_startButton, btn_switchInterface, ui_buttonContainer, btn_logger, btn_mainMenu, btn_toggle } from "./ui";
+
+export const uiGroup_startButtonGroup = new Set([btn_startButton, btn_switchInterface, ui_buttonContainer]);
+export const uiGroup_loggerGroup = new Set([btn_logger, btn_mainMenu, btn_toggle]);
 
 function parseStringToDomElement(templateString) {
   try {
     const parsedDocument = DomParser.parseFromString(templateString, "text/html");
     return parsedDocument.body.firstElementChild;
   } catch (error) {
-    throw new Error(`Failed to parse DOM element: ${error.message}`);
+    throw new Error(`Failed to parse DOM element: ${error.message}`, {
+      cause: error,
+    });
   }
 }
 
-function parseComponentIntoDomElement(strings, ...values) {
+export function parseComponentIntoDomElement(strings, ...values) {
   // each value is a ${} in the string template literal
   // recursivly expand all nested components to Dom elements
   const allSubElementsFound = [];
@@ -55,7 +58,7 @@ function parseComponentIntoDomElement(strings, ...values) {
   return { domElement, allSubElementsFound };
 }
 
-const UserInterface = {
+export const UserInterface = {
   activeUiGroup: new Set(),
 
   addUiElement: function (element) {
@@ -108,11 +111,11 @@ const UserInterface = {
       this.addUiElement(element);
     }
   },
-};
 
-function getToggleState(toggleButton) {
-  return toggleButton.classList.contains("toggled");
-}
+  getToggleState: function (toggleButton) {
+    return toggleButton.classList.contains("toggled");
+  },
+};
 
 function handleClick(event) {
   // traverse DOM upwards until match CSS selector for an element with an id

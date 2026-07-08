@@ -1,4 +1,7 @@
-const btn_switchInterface = new uiElement(
+import uiElement from "../uiElement";
+import { parseComponentIntoDomElement, UserInterface, uiGroup_loggerGroup } from "..";
+
+export const btn_switchInterface = new uiElement(
   "button",
   () => {
     return /* HTML */ parseComponentIntoDomElement`
